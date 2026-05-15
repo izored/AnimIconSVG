@@ -1,0 +1,19 @@
+AnimIconSVG — Framer Plugin
+Copyright (c) 2026 Reda Izo (dev.izo.red)
+
+---
+
+This plugin fetches animated icon data at runtime from ItsHover (https://itshover.com).
+
+ItsHover icons are licensed under the Apache License, Version 2.0.
+Copyright (c) ItsHover contributors (https://github.com/itshover/itshover)
+
+You may obtain a copy of the Apache License at:
+    https://www.apache.org/licenses/LICENSE-2.0
+
+The SVG representations produced by this plugin are derived works of ItsHover's
+original animated TSX components. Static SVG primitives (path, circle, rect, etc.)
+are extracted from the TSX source; Motion/React animation attributes are stripped.
+These derived works are subject to the same Apache 2.0 license terms.
+
+This plugin is not affiliated with or endorsed by ItsHover or Framer.

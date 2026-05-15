@@ -1,0 +1,13 @@
+{
+  "id": "itshvr",
+  "name": "ItsHover Icons",
+  "description": "Animated icon library built with Motion. Drag and drop into your Framer projects. Community plugin by Reda Izo.",
+  "version": "1.0.0",
+  "author": "Reda Izo <dev@izo.red> (https://dev.izo.red)",
+  "icon": "https://itshover.com/favicon.ico",
+  "entryPoint": "dist/index.html",
+  "permissions": ["read:canvas", "write:canvas"],
+  "width": 320,
+  "height": 600,
+  "modes": ["canvas"]
+}
