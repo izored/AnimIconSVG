@@ -1,4 +1,4 @@
-# AnimIconSVG
+# AnimIconSVG - A Framer plugin
 
 A Framer sidebar plugin that brings [ItsHover](https://itshover.com) animated icons directly to your canvas. Search 263+ icons, preview them with a stroke-draw hover animation, and insert onto the canvas in three modes.
 
