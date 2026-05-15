@@ -1,0 +1,26 @@
+{
+  "name": "itshover-framer-plugin",
+  "version": "1.0.0",
+  "description": "ItsHover animated icons for Framer — community plugin by Reda Izo",
+  "author": "Reda Izo <dev@izo.red> (https://dev.izo.red)",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "framer-plugin": "^2.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "lucide-react": "^0.460.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.1"
+  }
+}
