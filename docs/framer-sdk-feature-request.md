@@ -2,8 +2,8 @@
 
 **Title:** Allow programmatic canvas insertion of code components created via `unstable_createCodeFile`
 
-**Submitted by:** Reda Izo — izo.studio  
-**Plugin:** ItsHover Animated Icon Plugin  
+**Submitted by:** Reda Izo — dev.izo.red  
+**Plugin:** -ItsHover- Animated Icon integration plugin  
 **SDK version:** framer-plugin ^2.0.0
 
 ---
