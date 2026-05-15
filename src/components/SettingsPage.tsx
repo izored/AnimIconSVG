@@ -47,13 +47,19 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
         <span>Back</span>
       </button>
 
-      <div className="settings-section">
-        <div className="settings-section-title">Appearance</div>
-        <div className="settings-row">
-          <span className="settings-label">Theme</span>
+      <div className="settings-row-pair">
+        <div className="settings-section settings-section--half">
+          <div className="settings-section-title">Theme</div>
           <button className="theme-toggle-btn" onClick={toggleTheme}>
             {settings.theme === 'dark' ? <Moon size={14} /> : <Sun size={14} />}
             <span>{settings.theme === 'dark' ? 'Dark' : 'Light'}</span>
+          </button>
+        </div>
+
+        <div className="settings-section settings-section--half">
+          <div className="settings-section-title">Cache</div>
+          <button className="settings-btn settings-btn--small" onClick={handleClearCache}>
+            Clear cache
           </button>
         </div>
       </div>
@@ -144,20 +150,10 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
         </div>
       </div>
 
-      <div className="settings-section">
-        <div className="settings-section-title">Cache</div>
-        <div className="settings-cache-row">
-          <span className="settings-label">Icon cache</span>
-          <button className="settings-btn settings-btn--small" onClick={handleClearCache}>
-            Clear
-          </button>
-        </div>
-      </div>
-
       <div className="settings-footer">
-        <span>DIR v1.0.0 · </span>
+        <span>AnimIconSVG v1.0.0 · </span>
         <a href="https://dev.izo.red" target="_blank" rel="noreferrer">dev.izo.red</a>
-        <span> · Icons © </span>
+        <span> · Icons </span>
         <a href="https://itshover.com" target="_blank" rel="noreferrer">ItsHover</a>
         <span>, Apache 2.0</span>
       </div>
