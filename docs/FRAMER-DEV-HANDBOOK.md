@@ -23,7 +23,11 @@
 10. [localStorage Cross-Component Sync](#10-localstorage-cross-component-sync)
 11. [Browser vs Framer Iframe — Testing Strategy](#11-browser-vs-framer-iframe--testing-strategy)
 12. [Accessing the Plugin Developer Console](#12-accessing-the-plugin-developer-console)
-13. [Community Resources](#13-community-resources)
+13. [Code Components — Making Them Draggable](#13-code-components--making-them-draggable)
+14. [motion/react vs framer-motion in Code Components](#14-motionreact-vs-framer-motion-in-code-components)
+15. [Framer Canvas Sizing — Bounding Box and Intrinsic Size](#15-framer-canvas-sizing--bounding-box-and-intrinsic-size)
+16. [Wrapping forwardRef Icons for Framer Compatibility](#16-wrapping-forwardref-icons-for-framer-compatibility)
+17. [Community Resources](#17-community-resources)
 
 ---
 
@@ -227,12 +231,12 @@ The callback runs at drag-start (synchronous), not at registration time. SVG mus
 ### Create a code component in the Framer project
 
 ```ts
-// Install dependency FIRST — Framer compiles the file immediately on creation
-await framer.unstable_ensureMinimumDependencyVersion('motion', '11.0.0')
 await framer.unstable_createCodeFile('MyComponent.tsx', tsxSource)
 ```
 
-**Order matters.** If the package isn't installed before `createCodeFile`, Framer throws "Unable to resolve package" immediately.
+> **Do NOT call `unstable_ensureMinimumDependencyVersion('motion', ...)`** before this. Framer ships `framer-motion` internally — it is not an npm package you can install via the plugin API. Calling this with `'motion'` or `'framer-motion'` either silently fails or errors. Leave it out entirely.
+
+The file appears in **Assets → Code** in Framer's left sidebar — NOT in the Components panel.
 
 Related:
 ```ts
@@ -451,6 +455,189 @@ What to look for:
 | Framer Community — Unable to Connect | framer.community/c/developers/unable-to-connect | "Unable to connect to development plugin" |
 | Vite Troubleshooting | vite.dev/guide/troubleshooting | Dev server, HMR, CORS, case sensitivity |
 | motion/react docs | motion.dev/docs/react | Correct import for `motion/react` in Framer code components |
+
+---
+
+## 13. Code Components — Making Them Draggable
+
+A file created with `unstable_createCodeFile` appears in Assets → Code but is **not draggable** to the canvas by default. Three requirements must all be met:
+
+### Requirement 1: `export default`
+
+Framer only registers a code component as draggable if it has a **default export**. Named exports alone are ignored.
+
+```ts
+// ❌ Not draggable — named export only
+export function MyIcon() { ... }
+
+// ✅ Draggable
+export default function MyIcon() { ... }
+
+// ✅ Also works — named + default
+export function MyIcon() { ... }
+export default MyIcon
+```
+
+### Requirement 2: JSDoc layout annotations
+
+These comments must appear immediately before the exported function:
+
+```tsx
+/**
+ * @framerSupportedLayoutWidth fixed
+ * @framerSupportedLayoutHeight fixed
+ * @framerIntrinsicWidth 24
+ * @framerIntrinsicHeight 24
+ */
+export default function MyIcon() { ... }
+```
+
+Without `@framerSupportedLayoutWidth/Height`, Framer may not register the component at all. Without `@framerIntrinsicWidth/Height`, the component drops onto canvas at a large default size (200px+) instead of its natural size.
+
+### Requirement 3: `addPropertyControls`
+
+```ts
+import { addPropertyControls, ControlType } from "framer"
+
+// MUST be at the bottom of the file, after the component definition
+// MUST import from "framer" at the TOP of the file
+addPropertyControls(MyIcon, {
+  size: { type: ControlType.Number, defaultValue: 24 }
+})
+```
+
+**Critical:** The `import { addPropertyControls, ControlType } from "framer"` line must be at the **top** of the file with other imports. If you append it at the bottom, the file is invalid JS/TS and Framer rejects it silently.
+
+### Complete working pattern
+
+```tsx
+import { addPropertyControls, ControlType } from "framer"
+import { motion } from "framer-motion"
+
+/**
+ * @framerSupportedLayoutWidth fixed
+ * @framerSupportedLayoutHeight fixed
+ * @framerIntrinsicWidth 24
+ * @framerIntrinsicHeight 24
+ */
+export default function MyIcon({ size = 24, color = "currentColor", style }: {
+  size?: number
+  color?: string
+  style?: React.CSSProperties
+}) {
+  return (
+    <div style={{ width: size, height: size, ...style }}>
+      <svg width={size} height={size}>...</svg>
+    </div>
+  )
+}
+
+addPropertyControls(MyIcon, {
+  size: {
+    type: ControlType.Enum,
+    title: "Size",
+    options: [16, 20, 24, 32],
+    optionTitles: ["XS", "S", "M", "L"],
+    defaultValue: 24,
+  },
+  color: { type: ControlType.Color, title: "Color", defaultValue: "currentColor" },
+})
+```
+
+---
+
+## 14. motion/react vs framer-motion in Code Components
+
+Icons from itshover.com import from `"motion/react"`:
+
+```ts
+import { motion, useAnimate } from "motion/react"
+```
+
+**Framer cannot resolve `"motion/react"`** — it throws `"Module motion/react is not a valid npm package"`.
+
+Framer bundles `framer-motion` internally and exposes it under that name. Rewrite the import before injecting into Framer:
+
+```ts
+code = code.replace(/from\s+["']motion\/react["']/g, 'from "framer-motion"')
+```
+
+`useAnimate`, `motion`, `useRef`, `forwardRef`, `useImperativeHandle` — all available in `framer-motion` v10+, which is what Framer ships.
+
+**Do NOT add `framer-motion` to your plugin's `package.json`.** It runs inside Framer's runtime, not your plugin bundle.
+
+---
+
+## 15. Framer Canvas Sizing — Bounding Box and Intrinsic Size
+
+When a code component is dragged to canvas, Framer creates a bounding box frame. Without size hints, this frame defaults to a large size (~200×200px).
+
+**Fix:** Use JSDoc intrinsic size annotations (see §13) + accept Framer's injected `style` prop:
+
+```tsx
+function MyIcon({ size = 24, style }: { size?: number, style?: React.CSSProperties }) {
+  return (
+    // width/height set by size prop; style spread adds Framer's position/transform
+    <div style={{ width: size, height: size, display: "flex", alignItems: "center", justifyContent: "center", ...style }}>
+      <svg width={size} height={size}>...</svg>
+    </div>
+  )
+}
+```
+
+Framer injects `style` with `position`, `transform`, and layout data. If you don't spread `style`, the component won't position correctly on canvas. If you don't set explicit `width`/`height` before the spread, Framer's injected dimensions override yours.
+
+**Discovered:** `@framerSupportedLayoutWidth any` (from Framer's own examples) causes the component to stretch to fill any frame. Use `fixed` + `@framerIntrinsicWidth/Height` for icon components that should have a natural size.
+
+---
+
+## 16. Wrapping forwardRef Icons for Framer Compatibility
+
+ItsHover icons use `forwardRef` + `motion.svg` with `onHoverStart`/`onHoverEnd`. This pattern doesn't play well with Framer's `style` injection — the ref goes to the SVG, not a container div.
+
+**Solution:** Keep the original component 100% intact, add a thin Framer wrapper that handles canvas sizing and exposes property controls:
+
+```tsx
+// Original — untouched, full animation
+const BrandGrokIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
+  ({ size = 24, color = "currentColor" }, ref) => {
+    // ... useAnimate, motion.svg, onHoverStart, onHoverEnd
+  }
+)
+
+// Framer wrapper — handles canvas sizing
+/**
+ * @framerSupportedLayoutWidth fixed
+ * @framerSupportedLayoutHeight fixed
+ * @framerIntrinsicWidth 24
+ * @framerIntrinsicHeight 24
+ */
+function BrandGrokIconFramer({ size = 24, color = "currentColor", style }) {
+  return (
+    <div style={{ width: size, height: size, display: "flex", alignItems: "center", justifyContent: "center", ...style }}>
+      <BrandGrokIcon size={size} color={color} />
+    </div>
+  )
+}
+
+export default BrandGrokIconFramer
+addPropertyControls(BrandGrokIconFramer, { ... })
+```
+
+This preserves the original animation 1:1 while giving Framer what it needs.
+
+---
+
+## 17. Community Resources
+
+| Resource | URL | What it covers |
+|---|---|---|
+| Framer Official Troubleshooting | framer.com/developers/troubleshooting | "Failed to load Development Plugin," port conflicts, mode errors |
+| Framer Community — Plugins Not Loading | framer.community/c/plugins/plugins-not-loading | General plugin loading failures |
+| Reddit — Local Works, Dashboard Fails | reddit.com/r/framer/comments/1pg6pan/ | `base: "./"` fix for deployed plugins |
+| Framer Community — Unable to Connect | framer.community/c/developers/unable-to-connect | "Unable to connect to development plugin" |
+| Vite Troubleshooting | vite.dev/guide/troubleshooting | Dev server, HMR, CORS, case sensitivity |
+| motion/react docs | motion.dev/docs/react | Motion library — note: use `framer-motion` import inside Framer code components |
 
 ---
 

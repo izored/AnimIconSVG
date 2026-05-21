@@ -25,14 +25,6 @@ export async function insertMotionComponent(tsxSource: string, name: string): Pr
   const fileName = `${componentName}.tsx`
   const code = extractMotionComponent(tsxSource)
 
-  // Install motion BEFORE creating the file — Framer compiles on creation,
-  // so the package must already be present or the import will fail to resolve.
-  try {
-    await framer.unstable_ensureMinimumDependencyVersion('motion', '11.0.0')
-  } catch {
-    // non-fatal — motion may already be installed
-  }
-
   try {
     await framer.unstable_createCodeFile(fileName, code)
   } catch {

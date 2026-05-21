@@ -1,5 +1,42 @@
 import { useSettings } from '../hooks/useSettings'
-import { ChevronLeft, Sun, Moon } from 'lucide-react'
+import { ChevronLeft, Sun, Moon, Zap, PenLine, Square, CircleDot, Circle } from 'lucide-react'
+import { PluginFooter } from './PluginFooter'
+
+const INSERT_MODES = [
+  {
+    value: 'motion' as const,
+    label: 'Motion',
+    icon: Zap,
+    hint: 'Animated code component, hover to play',
+  },
+  {
+    value: 'animated' as const,
+    label: 'CSS Stroke',
+    icon: PenLine,
+    hint: 'CSS stroke animation, no packages',
+  },
+  {
+    value: 'svg' as const,
+    label: 'Static',
+    icon: Square,
+    hint: 'Plain SVG, no animation',
+  },
+]
+
+const ICON_STYLES = [
+  {
+    value: 'fill' as const,
+    label: 'Fill',
+    icon: CircleDot,
+    hint: 'Solid filled, best for brand icons',
+  },
+  {
+    value: 'stroke' as const,
+    label: 'Stroke',
+    hint: 'Outlined, best for UI icons',
+    icon: Circle,
+  },
+]
 
 const PRESET_COLORS = [
   { label: 'White', value: '#f5f5f5' },
@@ -66,43 +103,39 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
 
       <div className="settings-section">
         <div className="settings-section-title">Insert Mode</div>
-        <div className="settings-radio-group">
-          <label className="settings-radio">
-            <input
-              type="radio"
-              name="insertMode"
-              checked={settings.insertMode === 'motion'}
-              onChange={() => updateSettings({ insertMode: 'motion' })}
-            />
-            <div>
-              <div>Motion — ItsHover Animated</div>
-              <div className="settings-radio-hint">Adds motion/react component to your project</div>
-            </div>
-          </label>
-          <label className="settings-radio">
-            <input
-              type="radio"
-              name="insertMode"
-              checked={settings.insertMode === 'svg'}
-              onChange={() => updateSettings({ insertMode: 'svg' })}
-            />
-            <div>
-              <div>SvgIcon — Static</div>
-              <div className="settings-radio-hint">Plain SVG node, no animation</div>
-            </div>
-          </label>
-          <label className="settings-radio">
-            <input
-              type="radio"
-              name="insertMode"
-              checked={settings.insertMode === 'animated'}
-              onChange={() => updateSettings({ insertMode: 'animated' })}
-            />
-            <div>
-              <div>CSS Stroke — Basic</div>
-              <div className="settings-radio-hint">Generic stroke-draw animation, SVG only</div>
-            </div>
-          </label>
+        <div className="mode-btn-group">
+          {INSERT_MODES.map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              className={`mode-btn${settings.insertMode === value ? ' mode-btn--active' : ''}`}
+              onClick={() => updateSettings({ insertMode: value })}
+            >
+              <Icon size={16} />
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mode-hint">
+          {INSERT_MODES.find(m => m.value === settings.insertMode)?.hint}
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <div className="settings-section-title">Icon Style</div>
+        <div className="mode-btn-group">
+          {ICON_STYLES.map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              className={`mode-btn${settings.defaultStyle === value ? ' mode-btn--active' : ''}`}
+              onClick={() => updateSettings({ defaultStyle: value })}
+            >
+              <Icon size={16} />
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mode-hint">
+          {ICON_STYLES.find(s => s.value === settings.defaultStyle)?.hint}
         </div>
       </div>
 
@@ -150,13 +183,7 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
         </div>
       </div>
 
-      <div className="settings-footer">
-        <span>AnimIconSVG v1.0.0 · </span>
-        <a href="https://dev.izo.red" target="_blank" rel="noreferrer">dev.izo.red</a>
-        <span> · Icons </span>
-        <a href="https://itshover.com" target="_blank" rel="noreferrer">ItsHover</a>
-        <span>, Apache 2.0</span>
-      </div>
+      <PluginFooter />
     </div>
   )
 }

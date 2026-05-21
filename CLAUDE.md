@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-All commands run from `itshover-framer-plugin - ALPHA/`:
+All commands run from the repo root:
 
 ```bash
 npm install        # install deps
@@ -12,7 +12,7 @@ npm run dev        # dev server at localhost:5173 (use Framer's "Load URL")
 npm run build      # production build → /dist
 ```
 
-TypeScript check (no emit): `npx tsc --noEmit` from the same subfolder.
+TypeScript check (no emit): `npx tsc --noEmit` from the repo root.
 
 No test suite exists yet.
 
@@ -80,6 +80,22 @@ Examples:
 | 🐛 | bug fix |
 
 Pick the closest fit. If nothing fits well, use 🔧 as a fallback.
+
+## Copy & positioning rule
+
+**Before writing any user-facing copy** (UI labels, hints, descriptions, docs, info page, settings) — read `BRAND.md` first. All copy must be source-agnostic: never name a specific icon supplier (ItsHover etc.) in mode descriptions or feature copy. Sources change. The plugin's identity does not.
+
+## Tone of voice
+
+Write copy like the owner does — short, direct, no puffery.
+
+**Rules:**
+- No self-congratulatory language. Never: "genuine craft", "no VC", "no team, no budget", "built with love". Say the thing, stop.
+- Short declarative sentences. "Plugin free to use, forever." not "This plugin will always remain free for everyone to use."
+- If user provides exact copy, preserve it exactly — do not reformat, expand, or "improve" it.
+- Playful is OK when brief. "(yet? ;))" is fine. A paragraph explaining the joke is not.
+- No inflation of simple ideas. "deserves it" beats "deserves better tooling. No VC, no team, no budget — just genuine craft."
+- Hints and labels: one line, fewest words that carry the meaning. Cut adjectives first.
 
 ## Key constraints
 

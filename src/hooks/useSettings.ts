@@ -6,28 +6,33 @@ const DEFAULTS: Settings = {
   insertMode: 'motion',
   defaultSize: 24,
   defaultColor: '#0a0a0a',
+  defaultStyle: 'fill',
   theme: 'light',
 }
 
+function loadFromStorage(): Settings {
+  try {
+    const stored = localStorage.getItem(SETTINGS_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      const merged: Settings = { ...DEFAULTS, ...parsed }
+      if ((merged.insertMode as string) === 'code') merged.insertMode = 'motion'
+      return merged
+    }
+  } catch {
+    // ignore
+  }
+  return DEFAULTS
+}
+
 export function useSettings(): [Settings, (partial: Partial<Settings>) => void] {
-  const [settings, setSettings] = useState<Settings>(DEFAULTS)
+  // Lazy initializer reads localStorage synchronously — first render always has
+  // correct saved settings, no flash of wrong insert mode / style on remount.
+  const [settings, setSettings] = useState<Settings>(loadFromStorage)
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SETTINGS_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        const merged: Settings = { ...DEFAULTS, ...parsed }
-        if ((merged.insertMode as string) === 'code') merged.insertMode = 'motion'
-        setSettings(merged)
-        document.documentElement.setAttribute('data-theme', merged.theme)
-      } else {
-        document.documentElement.setAttribute('data-theme', 'light')
-      }
-    } catch (e) {
-      console.error('Failed to load settings:', e)
-      document.documentElement.setAttribute('data-theme', 'light')
-    }
+    // Apply theme to DOM on mount (can't do in loadFromStorage — no DOM during SSR)
+    document.documentElement.setAttribute('data-theme', settings.theme)
 
     const handleExternalUpdate = (e: Event) => {
       setSettings((e as CustomEvent<Settings>).detail)

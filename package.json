@@ -1,7 +1,7 @@
 {
-  "name": "itshover-framer-plugin",
+  "name": "animiconsvg-framer-plugin",
   "version": "1.0.0",
-  "description": "ItsHover animated icons for Framer — community plugin by Reda Izo",
+  "description": "Animated and static icons from open-source libraries for Framer — community plugin by Reda Izo",
   "author": "Reda Izo <dev@izo.red> (https://dev.izo.red)",
   "license": "MIT",
   "type": "module",
@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "framer-motion": "^12.40.0",
     "framer-plugin": "^2.0.0",
     "lucide-react": "^0.460.0",
     "react": "^18.3.1",

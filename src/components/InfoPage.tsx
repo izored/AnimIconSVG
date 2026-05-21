@@ -1,10 +1,14 @@
-import { ChevronLeft } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronLeft, X } from 'lucide-react'
+import { PluginFooter } from './PluginFooter'
 
 interface InfoPageProps {
   onBack: () => void
 }
 
 export function InfoPage({ onBack }: InfoPageProps) {
+  const [donationOpen, setDonationOpen] = useState(false)
+
   return (
     <div className="info-page">
       <button className="back-btn" onClick={onBack}>
@@ -13,17 +17,17 @@ export function InfoPage({ onBack }: InfoPageProps) {
       </button>
 
       <div className="info-section">
-        <div className="info-title">DIR</div>
-        <div className="info-subtitle">dev.izo.red</div>
+        <div className="info-title">AnimIconSVG</div>
+        <div className="info-subtitle">by Reda Izo · izo.red</div>
         <div className="info-desc">
-          Framer plugin for animated icons.
+          Bridges open-source icon libraries and Framer's canvas. Animated, CSS animated, or static SVG — your choice. We curate and connect, we don't create.
         </div>
         <div className="info-links info-links--row">
           <a className="info-link" href="https://dev.izo.red" target="_blank" rel="noreferrer">
             dev.izo.red
           </a>
           <a className="info-link" href="https://github.com/izored" target="_blank" rel="noreferrer">
-            github.com/izored
+            GitHub
           </a>
         </div>
       </div>
@@ -31,37 +35,47 @@ export function InfoPage({ onBack }: InfoPageProps) {
       <div className="info-divider" />
 
       <div className="info-section">
-        <div className="info-title">ItsHover Icons</div>
-        <div className="info-desc">
-          Animated icon library built with Motion.
-          <br />
-          Drag and drop into your Framer projects.
-        </div>
-        <div className="info-links info-links--row">
-          <a className="info-link" href="https://itshover.com" target="_blank" rel="noreferrer">
-            itshover.com
+        <div className="info-title">Icon Sources</div>
+        <div className="info-desc">Fetched at runtime. No affiliation with any source.</div>
+        <div className="source-list">
+          <a className="source-row" href="https://itshover.com" target="_blank" rel="noreferrer">
+            <span className="source-name">ItsHover</span>
+            <span className="source-badge">Apache 2.0</span>
           </a>
-          <a className="info-link" href="https://github.com/itshover/itshover" target="_blank" rel="noreferrer">
-            github.com/itshover
-          </a>
+          {/* add more sources here as rows */}
         </div>
       </div>
 
       <div className="info-bottom">
         <div className="info-attribution">
-          Plugin by <a href="https://dev.izo.red" target="_blank" rel="noreferrer">DIR / dev.izo.red</a>. Not affiliated with ItsHover.
+          Not affiliated with ItsHover or Framer (yet? ;))
           <br />
-          Icons by <a href="https://itshover.com" target="_blank" rel="noreferrer">ItsHover</a>, licensed under{' '}
-          <a href="https://github.com/itshover/itshover?tab=Apache-2.0-1-ov-file#readme" target="_blank" rel="noreferrer">Apache 2.0</a>.
+          Plugin free to use, forever.{' '}
+          <button className="donation-trigger" onClick={() => setDonationOpen(true)}>
+            Donations welcome.
+          </button>
         </div>
-        <div className="settings-footer">
-          <span>AnimIconSVG v1.0.0 · </span>
-          <a href="https://dev.izo.red" target="_blank" rel="noreferrer">dev.izo.red</a>
-          <span> · Icons </span>
-          <a href="https://itshover.com" target="_blank" rel="noreferrer">ItsHover</a>
-          <span>, Apache 2.0</span>
-        </div>
+        <PluginFooter />
       </div>
+      {donationOpen && (
+        <div className="donation-backdrop" onClick={() => setDonationOpen(false)}>
+          <div className="donation-modal" onClick={e => e.stopPropagation()}>
+            <button className="donation-close" onClick={() => setDonationOpen(false)}>
+              <X size={14} />
+            </button>
+            <div className="donation-title">Support AnimIconSVG</div>
+            <div className="donation-body">
+              This plugin is built and maintained solo, for free, because the Framer community deserves it.
+              <br /><br />
+              If it saves you time on a project, a small contribution goes a long way.
+            </div>
+            <div className="donation-where">
+              <div className="donation-where-label">Where to give</div>
+              <div className="donation-where-hint">Links coming soon — checking the best platform.</div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -3,7 +3,7 @@
 **Title:** Allow programmatic canvas insertion of code components created via `unstable_createCodeFile`
 
 **Submitted by:** Reda Izo — dev.izo.red  
-**Plugin:** -ItsHover- Animated Icon integration plugin  
+**Plugin:** AnimIconSVG — Animated Icon integration plugin  
 **SDK version:** framer-plugin ^2.0.0
 
 ---
@@ -119,7 +119,7 @@ This adds friction that breaks the "click to insert" promise of the plugin.
 ```
 Plugin creates GithubIcon.tsx
        ↓
-Shows: "Open the Components panel → Drag GithubIcon onto your page"
+Shows: "Open Assets → Code → Drag GithubIcon onto your canvas"
        ↓
 User must switch focus, search, drag manually
 ```
@@ -141,5 +141,5 @@ build with great UX.
 
 ## Contact
 
-hello@izo.studio  
+hello@izo.red  
 Plugin repo / feedback: dev.izo.red

@@ -1,9 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useMakeDraggable } from 'framer-plugin'
 import { useSettings } from '../hooks/useSettings'
-import { extractSVG } from '../utils/extractSVG'
+import { extractSVG, detectIconStyle } from '../utils/extractSVG'
+import { extractMotionComponent } from '../utils/extractMotionComponent'
 import { insertToCanvas, insertMotionComponent } from '../utils/insertToCanvas'
-import { fetchWithCache } from '../utils/fetchWithCache'
+import { downloadText } from '../utils/downloadFile'
+import { generateLicense } from '../utils/generateLicense'
+import { playMotionPreview } from '../utils/motionPreview'
+import iconSources from '../data/icon-sources.json'
 
 interface IconCardProps {
   name: string
@@ -11,43 +15,49 @@ interface IconCardProps {
   onMotionSuccess?: (name: string) => void
 }
 
-const CACHE_PREFIX = 'animicon_icon_'
-const CACHE_TTL = 7 * 24 * 60 * 60 * 1000
+const sources = iconSources as Record<string, string>
 
 export function IconCard({ name, onToast, onMotionSuccess }: IconCardProps) {
   const [settings] = useSettings()
   const [tsxSource, setTsxSource] = useState<string | null>(null)
   const [previewSvg, setPreviewSvg] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   const fetchedRef = useRef(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const previewRef = useRef<HTMLDivElement>(null)
 
   const fetchSource = useCallback(async (): Promise<string | null> => {
-    if (fetchedRef.current) return tsxSource
+    if (fetchedRef.current && tsxSource) return tsxSource
     if (isLoading) return null
 
     setIsLoading(true)
     try {
-      const data = await fetchWithCache<any>(
-        `https://www.itshover.com/r/${name}.json`,
-        `${CACHE_PREFIX}${name}`,
-        CACHE_TTL
-      )
-      const source = data.files?.[0]?.content || null
+      // All icon sources are local — no network request needed.
+      // IntersectionObserver still ensures we only process icons in viewport.
+      const source = sources[name] ?? null
       if (source) {
         fetchedRef.current = true
         setTsxSource(source)
-        setPreviewSvg(extractSVG(source, 'currentColor', 24))
+        // Always keep class attrs — motion preview needs them for animate() targeting,
+        // and they're harmless for static preview. Re-extracted by useEffect on mode change.
+        setPreviewSvg(extractSVG(source, 'currentColor', 24, false, undefined, true))
         return source
+      } else {
+        console.warn(`Icon not found in local sources: ${name}`)
       }
-    } catch (e) {
-      console.error(`Failed to fetch ${name}:`, e)
     } finally {
       setIsLoading(false)
     }
     return null
   }, [name, tsxSource, isLoading])
+
+  // Re-extract preview SVG when tsxSource loads or insert mode changes.
+  // keepClasses=true always — motion preview needs class attrs for animate() targeting.
+  useEffect(() => {
+    if (!tsxSource) return
+    setPreviewSvg(extractSVG(tsxSource, 'currentColor', 24, false, undefined, true))
+  }, [tsxSource, settings.insertMode])
 
   // Keep ref current so IntersectionObserver doesn't capture stale closure
   const fetchSourceRef = useRef(fetchSource)
@@ -104,8 +114,69 @@ export function IconCard({ name, onToast, onMotionSuccess }: IconCardProps) {
     return { type: 'svg' as const, svg: previewSvg ?? '', name }
   })
 
-  const handleMouseEnter = () => animatePaths(true)
-  const handleMouseLeave = () => animatePaths(false)
+  const toPascalCase = (kebab: string) =>
+    kebab.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+
+  const handleCopySVG = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const source = tsxSource || await fetchSource()
+    if (!source) { onToast('Source not loaded'); return }
+    const svg = extractSVG(source, settings.defaultColor, settings.defaultSize, true, settings.defaultStyle)
+    try {
+      await navigator.clipboard.writeText(svg)
+      onToast('Copied SVG')
+    } catch {
+      onToast('Copy failed')
+    }
+  }
+
+  const handleDownloadTSX = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const source = tsxSource || await fetchSource()
+    if (!source) { onToast('Source not loaded'); return }
+    const componentName = toPascalCase(name)
+    downloadText(`${componentName}.tsx`, extractMotionComponent(source))
+    downloadText('LICENSE', generateLicense(name))
+    onToast('Downloaded')
+  }
+
+  const handleMouseEnter = () => {
+    setIsHovered(true)
+    if (settings.insertMode === 'svg') return  // static mode — no animation
+
+    const container = previewRef.current
+    if (!container) return
+
+    if (settings.insertMode === 'motion' && tsxSource) {
+      // Play the actual ItsHover useAnimate animation on the SVG DOM elements
+      playMotionPreview(container, tsxSource, 'start')
+    } else {
+      const isFill = tsxSource ? detectIconStyle(tsxSource) === 'fill' : false
+      if (isFill) {
+        const svgEl = container.querySelector('svg')
+        if (svgEl) {
+          svgEl.classList.remove('icon-fill-bounce')
+          void svgEl.getBoundingClientRect()
+          svgEl.classList.add('icon-fill-bounce')
+        }
+      } else {
+        animatePaths(true)
+      }
+    }
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovered(false)
+    const container = previewRef.current
+    if (!container) return
+
+    if (settings.insertMode === 'motion' && tsxSource) {
+      playMotionPreview(container, tsxSource, 'stop')
+    } else {
+      animatePaths(false)
+      container.querySelector('svg')?.classList.remove('icon-fill-bounce')
+    }
+  }
 
   const handleClick = async () => {
     const source = tsxSource || await fetchSource()
@@ -121,7 +192,7 @@ export function IconCard({ name, onToast, onMotionSuccess }: IconCardProps) {
       return
     }
 
-    const svg = extractSVG(source, settings.defaultColor, settings.defaultSize, settings.insertMode === 'animated')
+    const svg = extractSVG(source, settings.defaultColor, settings.defaultSize, settings.insertMode === 'animated', settings.defaultStyle)
     const inserted = await insertToCanvas(svg, name)
     onToast(inserted ? `Added ${name}` : 'Failed to add icon')
   }
@@ -147,6 +218,12 @@ export function IconCard({ name, onToast, onMotionSuccess }: IconCardProps) {
         )}
       </div>
       <span className="icon-label">{displayName}</span>
+      {isHovered && tsxSource && (
+        <div className="icon-actions" onClick={e => e.stopPropagation()}>
+          <button className="icon-action-btn" onClick={handleCopySVG}>Copy SVG</button>
+          <button className="icon-action-btn" onClick={handleDownloadTSX}>↓ TSX</button>
+        </div>
+      )}
     </div>
   )
 }

@@ -14,8 +14,9 @@ export function MotionGuide({ componentName, onDismiss }: MotionGuideProps) {
       <div className="motion-guide-card" onClick={(e) => e.stopPropagation()}>
         <p className="motion-guide-name">{displayName}.tsx</p>
         <ol className="motion-guide-steps">
-          <li>Open the <strong>Components panel</strong> (left sidebar in Framer)</li>
-          <li>Drag <strong>{displayName}</strong> onto your page</li>
+          <li>Open the <strong>Assets tab</strong> in the left sidebar</li>
+          <li>Go to the <strong>Code</strong> section</li>
+          <li>Find <strong>{displayName}</strong> and drag it onto your canvas</li>
         </ol>
         <button className="motion-guide-dismiss" onClick={onDismiss}>Got it</button>
       </div>

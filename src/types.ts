@@ -6,6 +6,7 @@ export interface Settings {
   insertMode: 'motion' | 'svg' | 'animated';
   defaultSize: number;
   defaultColor: string;
+  defaultStyle: 'fill' | 'stroke';
   theme: 'light' | 'dark';
 }
 

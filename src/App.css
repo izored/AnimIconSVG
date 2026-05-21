@@ -24,8 +24,8 @@
   --border: #2a2a2a;
   --border-hover: #3a3a3a;
   --text-primary: #f5f5f5;
-  --text-secondary: #888888;
-  --text-muted: #555555;
+  --text-secondary: #aaaaaa;
+  --text-muted: #888888;
 }
 
 /* Layout */
@@ -340,6 +340,46 @@ html, body, #root {
   overflow: visible;
 }
 
+/* Icon action bar (Copy SVG / Download TSX) */
+.icon-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--bg-card-hover);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  animation: actionBarIn 120ms ease;
+}
+
+@keyframes actionBarIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.icon-action-btn {
+  flex: 1;
+  font-size: 9px;
+  padding: 3px 0;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.icon-action-btn:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
 /* Skeleton placeholder */
 .icon-skeleton {
   width: 24px;
@@ -360,6 +400,17 @@ html, body, #root {
 /* Stroke-draw animation triggered on hover via JS */
 @keyframes animicon-draw {
   to { stroke-dashoffset: 0; }
+}
+
+/* Fill icon hover — bounce spring */
+.icon-fill-bounce {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fillBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes fillBounce {
+  0%   { transform: scale(0.78); }
+  100% { transform: scale(1); }
 }
 
 .icon-label {
@@ -477,6 +528,51 @@ html, body, #root {
   font-size: 12px;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+}
+
+/* Mode button group — icon + label, side by side */
+.mode-btn-group {
+  display: flex;
+  gap: 6px;
+}
+
+.mode-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 150ms ease;
+}
+
+.mode-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+
+.mode-btn--active {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.mode-hint {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .settings-radio-group {
@@ -633,15 +729,53 @@ html, body, #root {
   color: var(--accent);
 }
 
+/* Source list — compact per-library rows, scales to many sources */
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.source-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.source-row:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+
+.source-name {
+  font-size: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.source-badge {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 1px 7px;
+}
+
 /* Info Page */
 .info-page {
   padding: 12px;
   overflow-y: auto;
   height: 100%;
-  text-align: center;
   display: flex;
   flex-direction: column;
-  align-items: center;
   box-sizing: border-box;
 }
 
@@ -733,6 +867,111 @@ html, body, #root {
 
 .info-attribution a:hover {
   color: var(--accent);
+}
+
+.donation-trigger {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: inherit;
+  font-family: inherit;
+  text-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
+  animation: donationPulse 2.5s ease-in-out infinite;
+  transition: text-shadow 150ms ease;
+}
+
+.donation-trigger:hover {
+  text-shadow: 0 0 14px rgba(255, 107, 53, 0.9);
+  animation: none;
+}
+
+@keyframes donationPulse {
+  0%, 100% { text-shadow: 0 0 6px rgba(255, 107, 53, 0.4); }
+  50%       { text-shadow: 0 0 14px rgba(255, 107, 53, 0.8); }
+}
+
+/* Donation modal */
+.donation-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fadeIn 150ms ease;
+}
+
+[data-theme="dark"] .donation-backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.donation-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  width: 260px;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  animation: slideUp 180ms ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.donation-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.donation-close:hover { color: var(--text-primary); }
+
+.donation-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.donation-body {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.donation-where {
+  padding: 10px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.donation-where-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.donation-where-hint {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .info-bottom .settings-footer {

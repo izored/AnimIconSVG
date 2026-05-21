@@ -6,6 +6,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [1.1.0] - 2026-05-21
+
+> ⚠️ **Known issues — hotfix incoming.**
+> Preview SVG in the icon grid is currently broken for some icons. Settings page changes do not reflect in the preview library. Fix in progress.
+
+### Added
+- 🎬 Motion preview: hover over any icon in Motion mode plays the actual hover animation — no CDN, no eval, no Babel. Uses framer-motion's imperative `animate()` API on DOM elements directly
+- 🗂️ All 263 icons bundled locally in `icon-sources.json` (660 KB) — zero network requests, zero trust on external uptime
+- 🖱️ Hover action bar: Copy SVG and ↓ TSX buttons appear on hover for quick export without inserting to canvas
+- 📦 Download TSX exports a standalone React component (motion dep, no Framer SDK) + Apache 2.0 LICENSE file
+- 🎬 Group-aware SVG extraction: `<motion.g className="X">` becomes `<g class="X">` in preview SVG so framer-motion can target and animate it
+- 🔧 `extractStartFunctionBody` — reads `startAnimation` name from `useImperativeHandle`, parses only the hover-start function (previously ran start + stop together, cancelling the animation immediately)
+
+### Changed
+- 🚀 `useSettings` now initializes from localStorage synchronously (lazy `useState` initializer) — no flash of wrong settings on grid remount after visiting settings page
+- 🎬 SVG preview in Motion mode injects `transform-box: fill-box; transform-origin: center` so scale/rotate animations apply from element center, not SVG viewport origin
+- 🔀 `querySelectorAll` replaces `querySelector` — tag-name selectors (`path`, `circle`) now animate all matching elements, not just the first
+- 🖱️ Hover animation is mode-aware: Motion mode plays actual icon animation, CSS Stroke mode plays stroke-draw, Static mode no animation
+- 🎨 Fill icon hover uses spring bounce CSS animation — `transform-box: fill-box` added so scale applies from icon center
+- 📐 Framer code component wrapper: 12% padding, `overflow: visible`, inner SVG `size={256}` + CSS `width/height: 100%` — bounding box resizes correctly on canvas
+
+### Fixed
+- 🐛 Fill icons rendering as solid black circles — `substituteJSXProps` pre-substitutes `stroke={color}` / `fill={color}` before regex extraction; preview ignores `defaultStyle` override
+- 🐛 `<motion.g>` consuming child elements — removed `g` from PRIMITIVES; `TAG_RE` lazy match was absorbing children into the group tag match
+- 🐛 Stale closure: `keepClasses` captured wrong `insertMode` at `useCallback` memo time — removed conditional, always `keepClasses=true` for preview
+- 🐛 `pathLength` / `opacity` reset direction on hover-stop — arrays like `[0, 1]` now reset to first value (`0`), not hardcoded `1`
+
+---
+
 ## [1.0.0] - 2026-05-15
 
 > ⚠️ **Alpha release — animations not fully implemented.**
