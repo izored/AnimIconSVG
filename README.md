@@ -1,5 +1,7 @@
 # AnimIconSVG - A Framer plugin
 
+[![Sponsor](https://img.shields.io/badge/sponsor-%E2%9D%A4-db61a2?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/izored) [![Buy me a coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/izored)
+
 A Framer sidebar plugin that brings [ItsHover](https://itshover.com) animated icons directly to your canvas. Search 263+ icons, preview them with a stroke-draw hover animation, and insert onto the canvas in three modes.
 
 <!-- add screenshot -->
